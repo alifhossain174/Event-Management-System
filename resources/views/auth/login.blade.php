@@ -1,5 +1,5 @@
 <x-layouts.app title="Log in">
-    <main class="container py-5">
+    <div class="container py-5">
         <div class="card auth-card mx-auto">
             <div class="card-body p-4">
                 <h1 class="h3 mb-3">Log in</h1>
@@ -23,5 +23,5 @@
                 <a class="d-block mt-3" href="{{ route('password.request') }}">Forgot your password?</a>
             </div>
         </div>
-    </main>
+    </div>
 </x-layouts.app>

@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\UiStyleGuideController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserStatusController;
 use Illuminate\Support\Facades\Route;
@@ -40,4 +41,8 @@ Route::middleware(['auth', 'active'])->group(function () {
 
     Route::patch('/users/{user}/status', UserStatusController::class)->name('users.status.update');
     Route::resource('users', UserController::class);
+
+    if (app()->environment(['local', 'testing'])) {
+        Route::get('/style-guide', UiStyleGuideController::class)->name('style-guide');
+    }
 });

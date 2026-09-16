@@ -13,6 +13,8 @@ Implemented now:
 
 Prompt 03 created no business migration, model, factory, or seeder. Prompt 04 implements only the identity/security tables identified below; all Event Management business tables remain planned.
 
+Prompt 05 is presentation-only and introduces no migration, table, model, factory, or seeder.
+
 ## Database-wide conventions
 
 ### Engine, character set, and identifiers

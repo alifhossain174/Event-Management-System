@@ -1,5 +1,5 @@
 <x-layouts.app title="Forgot password">
-    <main class="container py-5">
+    <div class="container py-5">
         <div class="card auth-card mx-auto">
             <div class="card-body p-4">
                 <h1 class="h3 mb-3">Reset password</h1>
@@ -15,5 +15,5 @@
                 </form>
             </div>
         </div>
-    </main>
+    </div>
 </x-layouts.app>

@@ -1,61 +1,107 @@
+@props(['title' => null, 'breadcrumbs' => [], 'wide' => false])
+
 <!doctype html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="color-scheme" content="light">
 
-    <title>{{ $title ?? config('app.name') }}</title>
+    <title>{{ $title ? $title.' · '.config('app.name') : config('app.name') }}</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body>
-    <nav class="navbar navbar-expand-lg bg-dark navbar-dark" aria-label="Primary navigation">
-        <div class="container">
-            <a class="navbar-brand" href="{{ route('home') }}">Event Management</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#primaryNavigation" aria-controls="primaryNavigation" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="primaryNavigation">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    @foreach ($navigationItems ?? [] as $item)
-                        <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs($item['route']) ? 'active' : '' }}" href="{{ route($item['route']) }}">
-                                {{ $item['label'] }}
-                            </a>
-                        </li>
-                    @endforeach
-                </ul>
-                <div class="d-flex align-items-center gap-3 text-white">
-                    @auth
-                        <span class="small">{{ auth()->user()->name }}</span>
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button class="btn btn-outline-light btn-sm" type="submit">Log out</button>
-                        </form>
-                    @else
-                        <a class="btn btn-outline-light btn-sm" href="{{ route('login') }}">Log in</a>
-                    @endauth
+<body class="{{ auth()->check() ? 'admin-body' : 'guest-body' }}">
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+
+    @auth
+        <div class="admin-shell">
+            <aside class="admin-sidebar d-none d-lg-flex flex-column">
+                <x-navigation.sidebar :groups="$navigationGroups ?? []"/>
+            </aside>
+
+            <div class="offcanvas offcanvas-start admin-mobile-sidebar" tabindex="-1" id="mobileSidebar" aria-labelledby="mobileSidebarLabel">
+                <div class="offcanvas-header border-bottom border-light border-opacity-10">
+                    <h2 class="offcanvas-title h5 mb-0 text-white" id="mobileSidebarLabel">Navigation</h2>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close navigation"></button>
+                </div>
+                <div class="offcanvas-body p-0">
+                    <x-navigation.sidebar :groups="$navigationGroups ?? []"/>
                 </div>
             </div>
-        </div>
-    </nav>
 
-    <div class="container pt-3">
-        @if (session('status'))
-            <div class="alert alert-success" role="status">{{ session('status') }}</div>
-        @endif
-        @if ($errors->any())
-            <div class="alert alert-danger" role="alert">
-                <ul class="mb-0">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
+            <div class="admin-main">
+                <header class="admin-topbar">
+                    <button class="btn btn-icon d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar" aria-controls="mobileSidebar" aria-label="Open navigation">
+                        <x-ui.icon name="menu"/>
+                    </button>
+
+                    <div class="ms-auto d-flex align-items-center gap-2">
+                        <div class="dropdown">
+                            <button class="btn btn-icon position-relative" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifications, none unread">
+                                <x-ui.icon name="bell"/>
+                                <span class="notification-indicator" aria-hidden="true">0</span>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-end notification-menu p-3">
+                                <p class="fw-semibold mb-1">Notifications</p>
+                                <p class="small text-secondary mb-0">No new notifications.</p>
+                            </div>
+                        </div>
+
+                        <div class="dropdown">
+                            <button class="btn account-menu-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span class="account-avatar" aria-hidden="true">{{ Str::upper(Str::substr(auth()->user()->name, 0, 1)) }}</span>
+                                <span class="d-none d-sm-block text-start">
+                                    <strong class="d-block small">{{ auth()->user()->name }}</strong>
+                                    <span class="d-block text-secondary account-role">{{ auth()->user()->roles->pluck('name')->first() ?? 'User' }}</span>
+                                </span>
+                                <x-ui.icon name="chevron-down" :size="15"/>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                <li><a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('profile.edit') }}"><x-ui.icon name="user" :size="17"/>Profile</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form method="POST" action="{{ route('logout') }}">
+                                        @csrf
+                                        <button class="dropdown-item" type="submit">Log out</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </header>
+
+                <main id="main-content" class="admin-content" tabindex="-1">
+                    <div class="{{ $wide ? 'container-fluid' : 'container-xl' }}">
+                        <x-ui.breadcrumbs :items="$breadcrumbs"/>
+                        <x-ui.flash-messages/>
+                        <x-ui.validation-summary class="mb-4"/>
+                        {{ $slot }}
+                    </div>
+                </main>
             </div>
-        @endif
-    </div>
+        </div>
+    @else
+        <header class="guest-header">
+            <nav class="navbar navbar-expand bg-white border-bottom" aria-label="Public navigation">
+                <div class="container-xl">
+                    <a class="navbar-brand fw-semibold" href="{{ route('home') }}">Event Management</a>
+                    @unless (request()->routeIs('login'))
+                        <a class="btn btn-primary btn-sm" href="{{ route('login') }}">Log in</a>
+                    @endunless
+                </div>
+            </nav>
+        </header>
+        <main id="main-content" tabindex="-1">
+            <div class="container-xl pt-3">
+                <x-ui.flash-messages/>
+                <x-ui.validation-summary/>
+            </div>
+            {{ $slot }}
+        </main>
+    @endauth
 
-    {{ $slot }}
+    <x-ui.confirmation-modal/>
 </body>
 </html>

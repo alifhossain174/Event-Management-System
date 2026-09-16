@@ -2,7 +2,7 @@
 
 ## Current state
 
-Prompt 04 authentication, account lifecycle, and native RBAC are implemented and ready for review. The repository now has server-rendered authentication, seven seeded roles, granular permissions, protected user administration, account status history, and security audit coverage. Event Management business modules remain unimplemented.
+Prompt 05 administration shell and reusable UI components are implemented and ready for review. The repository now has a responsive permission-aware shell, accessible shared Blade components, local-only style guide, and production error experiences. Event Management business modules remain unimplemented.
 
 Status values for future updates are `Not Started`, `In Progress`, `Blocked`, `Ready for Review`, and `Complete`.
 
@@ -40,6 +40,17 @@ Status values for future updates are `Not Started`, `In Progress`, `Blocked`, `R
 | A04-05 | Audit, login, and user-status history for sensitive actions. | Complete for Prompt 04 account/security actions; future domain actions remain with their owning prompts. |
 | A04-06 | Automated authentication, reset, inactive-user, RBAC, direct-route authorization, administrator-access, and profile coverage. | Complete — focused and full verification passed. |
 
+## Prompt 05 Blade administration shell and UI components
+
+| Step | Deliverable | Status |
+| --- | --- | --- |
+| A05-01 | Responsive administration shell with desktop sidebar, mobile offcanvas navigation, top bar, breadcrumbs, account menu, and notification placeholder. | Complete — implemented with Bootstrap 5 and vanilla JavaScript. |
+| A05-02 | Shared flash, validation, confirmation, empty-state, pagination, filter, table, badge, form, tab, and icon components. | Complete — documented in docs/UI_COMPONENTS.md and used by existing user/profile screens. |
+| A05-03 | Semantic labels, keyboard access, visible focus, contrast, reduced motion, responsive behavior, and escaped output. | Complete for the component baseline; full browser/manual accessibility audit remains P5. |
+| A05-04 | Production-oriented 403, 404, 419, and 500 views. | Complete — each gives a clear explanation and recovery action without exposing internals. |
+| A05-05 | Local/testing-only protected UI style guide. | Complete — /style-guide is registered only in local/testing and remains behind authentication/active-account middleware. |
+| A05-06 | View/component regression coverage and full verification. | Complete — shell, permissions, escaping, style guide, and error views are covered. |
+
 ## P1 Foundation and core Client to Event flow
 
 | Step | Deliverable | Status |
@@ -56,7 +67,7 @@ Status values for future updates are `Not Started`, `In Progress`, `Blocked`, `R
 | P1-10 | Event duplication, notes, timeline, media metadata, and completion/correction rules. | Not Started |
 | P1-11 | Protected common Document service using local Laravel storage. | Not Started |
 | P1-12 | Audit log, login history, and sensitive-action coverage. | In Progress — Prompt 04 covers identity/security actions; later module prompts add their sensitive actions. |
-| P1-13 | Basic role-aware Dashboard, global search, reusable lists, filters, pagination, sorting, and archive patterns. | In Progress — Prompt 04 establishes permission-aware navigation and the user list/archive pattern; Dashboard/global search remain. |
+| P1-13 | Basic role-aware Dashboard, global search, reusable lists, filters, pagination, sorting, and archive patterns. | In Progress — Prompt 05 completes the reusable administration shell/list/filter/pagination patterns; Dashboard, global search, and generic sorting remain. |
 | P1-14 | P1 automated tests and core manager-flow acceptance test with Booking and portal accounts absent. | Not Started |
 
 ## P2 Common operations and finance

@@ -28,6 +28,8 @@ Prompt 04 provides partial P1 evidence for M02, M29, FR-X02, FR-X03, FR-X04, NFR
 
 This is not completion evidence for M29 or the cross-cutting requirements beyond identity/security; later domain prompts must extend the audit and authorization matrix for their own sensitive actions.
 
+Prompt 05 adds partial P1 evidence for FR-X02, NFR-01, NFR-04, NFR-08, NFR-09, and NFR-13 through AdministrationShellTest: responsive administration landmarks, permission-filtered navigation with independent direct-route denial, semantic feedback/error patterns, escaped component output, server-side pagination presentation, and a local/testing-only component reference. Full keyboard/browser/device auditing remains planned for P5.
+
 ## Functional module traceability
 
 | ID | SRS module | Planned phase | Planned test evidence |

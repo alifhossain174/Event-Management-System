@@ -4,7 +4,7 @@
 
 This document fixes the application boundaries for feature development. It defines how the Laravel 12 application is organized, how the Event-centered optional-module model works, and which infrastructure choices are allowed on the cPanel target.
 
-Prompt 03 establishes architecture only. The current implementation remains the Prompt 02 bootstrap: a landing page, JSON health route, Laravel framework tables, Bootstrap/Vite assets, and bootstrap tests. No business module described below is implemented merely because its boundary or future class location appears here.
+Prompt 03 established the architecture baseline. Prompts 04 and 05 implement identity/RBAC and the reusable administration UI foundation. No Event Management business module described below is implemented merely because its boundary, navigation concept, or future class location appears here.
 
 ## System shape
 
@@ -186,6 +186,19 @@ Prompt 04 implements identity/security with Laravel's native session guard, pass
 - `audit_logs`, `login_histories`, and `user_status_histories` record Prompt 04 security history. Password values and reset tokens are never stored in audit payloads.
 - Public self-registration has no route. Administrators create accounts, and initial local setup uses environment-only credentials or the interactive administrator command.
 
+### Implemented administration UI baseline
+
+Prompt 05 provides one responsive Blade/Bootstrap administration shell for protected screens:
+
+- fixed desktop sidebar and Bootstrap offcanvas mobile navigation;
+- sticky top navigation with a static notification placeholder and account menu;
+- permission-filtered navigation groups, breadcrumbs, flash feedback, validation summary, and a shared confirmation modal;
+- reusable components for page headers, empty states, filters, bounded paginated tables, status badges, form controls, tabs, pagination, and a fixed whitelist of inline SVG icons;
+- production-oriented 403, 404, 419, and 500 views;
+- a protected style guide route registered only in local/testing environments.
+
+Presentation components escape ordinary output and improve accessibility, but do not authorize. Routes, controllers, Policies/Gates, Form Requests, and query scopes remain the security boundary. The component contract and examples are documented in docs/UI_COMPONENTS.md.
+
 ## Financial boundaries and transactions
 
 Financial amounts use decimal arithmetic and stored snapshots. Controllers and Blade templates never calculate authoritative totals.
@@ -233,7 +246,7 @@ Public storage is limited to intentionally public media. Signed URLs, if used, a
 
 Each implemented module requires feature tests for server-side authorization, Form Request validation, normal and failure paths, filters/pagination where lists exist, archive/history behavior, and enabled/disabled Event states. Unit tests cover pure rules and calculations. Database tests cover constraints, indexes, transactions, and rollback behavior.
 
-Prompt 03 added no business behavior. Prompt 04 adds only the identity/security foundation and user-administration screens; Event Management business routes and tables remain deferred. Architecture contract tests continue to validate the baseline and stable module keys.
+Prompt 03 added no business behavior. Prompt 04 added identity/security, and Prompt 05 adds only the shared presentation foundation. Event Management business routes and tables remain deferred. Architecture contract tests continue to validate the baseline and stable module keys.
 
 ## Architecture decision records
 

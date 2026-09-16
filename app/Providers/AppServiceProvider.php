@@ -42,7 +42,7 @@ class AppServiceProvider extends ServiceProvider
         }
 
         View::composer('*', function ($view) {
-            $view->with('navigationItems', app(Navigation::class)->for(auth()->user()));
+            $view->with('navigationGroups', app(Navigation::class)->for(auth()->user()));
         });
     }
 }
