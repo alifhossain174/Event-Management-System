@@ -30,6 +30,10 @@ This is not completion evidence for M29 or the cross-cutting requirements beyond
 
 Prompt 05 adds partial P1 evidence for FR-X02, NFR-01, NFR-04, NFR-08, NFR-09, and NFR-13 through AdministrationShellTest: responsive administration landmarks, permission-filtered navigation with independent direct-route denial, semantic feedback/error patterns, escaped component output, server-side pagination presentation, and a local/testing-only component reference. Full keyboard/browser/device auditing remains planned for P5.
 
+Prompt 06 adds P1 evidence for M28, FR-X02, FR-X03, FR-X06, FR-X07, FR-X08, NFR-01, NFR-04, NFR-07, NFR-10, NFR-12, and NFR-13 through `SettingsManagementTest` and `MasterDataManagementTest`: typed cached settings, encrypted/masked secrets, company branding metadata, disabled-by-default branches, explicit null-safe branch scope, direct-route authorization denial, separate configurable category domains, filters, pagination, soft archive, and redacted audit entries. Backup, provider, Event, and production branch-isolation completion remain assigned to their later phases.
+
+Prompt 08 adds P1 evidence for M04, FR-X02, FR-X03, FR-X04, FR-X05, FR-X07, FR-X11, NFR-01, NFR-02, NFR-04, NFR-07, and NFR-12 through `ClientManagementTest`: individual/organization creation without a User, normalized search, advisory duplicates that allow shared contacts, pagination/filters, explicit branch scope, contact management, archive/reactivate and merge history, no destructive Client route, policy denial, privileged portal linking, protected-document context, and Event-form lookup/quick-create using shared validation. Event links, the Draft transition gate, and financial/communication summaries remain assigned to their owning prompts.
+
 ## Functional module traceability
 
 | ID | SRS module | Planned phase | Planned test evidence |

@@ -21,6 +21,14 @@ This project targets Laravel 12 on PHP 8.2. The verified local tools are XAMPP P
 & 'E:\xampp8.2\mysql\bin\mysql.exe' --protocol=tcp --host=127.0.0.1 --port=3306 --user=root --execute="CREATE DATABASE IF NOT EXISTS event_management CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 ~~~
 
+Create the separate PHPUnit database as well. Feature tests use `RefreshDatabase` and must never target the development schema:
+
+~~~powershell
+& 'E:\xampp8.2\mysql\bin\mysql.exe' --protocol=tcp --host=127.0.0.1 --port=3306 --user=root --execute="CREATE DATABASE IF NOT EXISTS event_management_testing CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+~~~
+
+`phpunit.xml` fixes `DB_DATABASE=event_management_testing` for automated tests. Do not point this value at a schema containing development or production records.
+
 The default XAMPP development configuration uses the local root account with a blank password. Keep MySQL bound to localhost. Use a dedicated least-privilege account and a secret password for any shared or production environment.
 
 ## Install and configure the project

@@ -15,6 +15,12 @@ Prompt 03 created no business migration, model, factory, or seeder. Prompt 04 im
 
 Prompt 05 is presentation-only and introduces no migration, table, model, factory, or seeder.
 
+Prompt 06 implements `companies`, `branches`, `branch_user`, `system_settings`, `event_categories`, `vendor_categories`, `inventory_categories`, `finance_categories`, and `document_categories`. It does not implement Events, Vendors, Inventory Items, finance ledgers, Documents, provider credentials, or any later module behavior.
+
+Prompt 07 implements `status_histories`, `documents`, `document_versions`, and `document_links`, and hardens the existing `audit_logs` and `login_histories` as append-only Eloquent records. Document links currently allow Company, Branch, and User contexts; planned Event/Client/Vendor/Booking contexts remain unavailable until those owner tables and policies exist.
+
+Prompt 08 implements `clients` and `client_contacts`, enables Client document links, and reuses generic status/audit history. Events, Bookings, Invoices, Payments, and Communications remain planned; the Client detail summaries detect those tables only when their owning prompts implement them.
+
 ## Database-wide conventions
 
 ### Engine, character set, and identifiers
@@ -109,9 +115,9 @@ Status values distinguish implemented framework/identity foundations from planne
 | SRS module and key | Scope | Status | Proposed tables |
 | --- | --- | --- | --- |
 | M01 dashboard | Global projection | Planned | No source table. Optional saved_filters after a demonstrated need; metrics derive from source tables. |
-| M02 users | Global | Identity/RBAC implemented; organization links planned | users account controls, roles, permissions, role_user, permission_role, login_histories, and user_status_histories are implemented. user_branches and optional user_profiles remain planned. |
-| M03 events | Core | Planned | event_categories, event_templates, module_definitions, event_template_modules, events, event_module_settings, event_status_histories, event_timeline_items, event_notes, event_media. |
-| M04 clients | Global master | Planned | clients, client_contacts; use a client_type column for individual or organization and nullable unique user_id. |
+| M02 users | Global | Identity/RBAC and branch assignment foundation implemented | users account controls, roles, permissions, role_user, permission_role, login_histories, user_status_histories, and branch_user are implemented. Optional user_profiles remain planned. |
+| M03 events | Core | Event categories implemented; Event behavior planned | event_categories is implemented. event_templates, module_definitions, event_template_modules, events, event_module_settings, event_status_histories, event_timeline_items, event_notes, and event_media remain planned. |
+| M04 clients | Global master | Implemented in Prompt 08 | clients and client_contacts are implemented. `type` distinguishes individual/organization; user_id and branch_id are nullable; normalized search columns are indexed; archive/reactivate/merge preserve history and restrictive downstream references. |
 | M05 booking | Optional upstream | Planned | bookings, booking_status_histories, booking_changes, waitlist_entries; later add nullable events.booking_id. |
 | M06 venue | Event-scoped | Planned | venues, venue_spaces, venue_facilities, venue_space_facility, venue_rates, venue_unavailability, venue_allocations, venue_media. Allocations require event_id. |
 | M07 vendors | Global master plus Event work | Planned | vendors, vendor_categories, vendor_category_vendor, vendor_availabilities, vendor_assignments, vendor_contracts, vendor_ratings, vendor_invoices, vendor_payments. Assignment and finance rows require event_id where applicable. |
@@ -131,12 +137,12 @@ Status values distinguish implemented framework/identity foundations from planne
 | M21 marketing | Event-scoped | Planned | marketing_campaigns, campaign_recipients, consent_records, coupons, coupon_redemptions, referrals, campaign_metrics. Campaigns and attribution rows require event_id where applicable. |
 | M22 communications | Event-scoped capability | Planned | message_templates, outbound_messages, message_recipients, delivery_logs, reminder_schedules. Event communication rows carry event_id; templates may be global. |
 | M23 calendar | Global projection | Planned | No duplicated schedule source table. Optional saved_calendar_filters; views query Events and enabled scheduling sources. |
-| M24 documents | Event-scoped shared service | Planned | document_categories, documents, document_links, document_versions. An Event link uses event_id; the polymorphic-like link design must use an allowlist and application authorization. |
+| M24 documents | Event-scoped shared service | Shared service implemented; Client ownership implemented; Event ownership planned | document_categories, documents, document_links, and document_versions are implemented with private storage and allowlisted Company/Branch/User/Client links. Event/Vendor/Booking links wait for those owner modules. |
 | M25 reports | Global projection | Planned | No reporting ledger. Optional report_definitions and saved_report_filters; synchronous exports are generated from source queries and are not queue jobs. |
 | M26 analytics | Global projection | Planned | metric_definitions and metric_snapshots only after measured need. Snapshots are rebuildable and never replace transactions. |
 | M27 notifications | Global | Planned | notifications, notification_recipients. Optional source type/id and event_id link; read state belongs to each recipient. |
-| M28 settings | Global | Planned | companies, branches, system_settings, integration_credentials, backup_records, api_keys, two_factor_methods. branch_id remains nullable outside branch records until branch mode is enabled. |
-| M29 audit | Global cross-cutting | Prompt 04 baseline implemented | audit_logs and login_histories are implemented for identity/security actions and are append-only through application services. Broader security_events and module-specific audit context remain planned. |
+| M28 settings | Global | Company, branches, and typed settings implemented; integrations/security/backup planned | companies, branches, branch_user, and system_settings are implemented. integration_credentials, backup_records, api_keys, and two_factor_methods remain planned. branch_id remains nullable outside branch records until branch mode is enabled. |
+| M29 audit | Global cross-cutting | Prompt 07 baseline implemented | audit_logs and login_histories are append-only through model guards, have protected filter/detail screens, and central audit metadata redaction. Generic status_histories are implemented. Broader security_events and later module-specific audit context remain planned. |
 
 ## Key and index roadmap
 
@@ -181,10 +187,10 @@ Migration filenames use increasing timestamps and each group must pass migrate, 
 | Group | Phase | Contents and dependency order |
 | --- | --- | --- |
 | G00 Framework baseline | Implemented | users/password resets/sessions, cache/cache locks, migrations repository |
-| G10 Organization, identity, and security | Partially implemented in P1 | Prompt 04 implements user account controls, roles, permissions, pivots, login histories, user status histories, and audit logs. Companies, branches, optional profiles, broader security events, and system settings remain planned. |
-| G20 Independent master data | P1 | clients and contacts; vendor categories/vendors; departments/staff profiles; configurable Event categories |
+| G10 Organization, identity, and security | Partially implemented in P1 | Prompts 04, 06, and 07 implement user account controls, roles, permissions, append-only audit/login/status history, protected audit views, companies, branches, assignments, and typed settings. Optional profiles, broader security events, provider credentials, and backup/security records remain planned. |
+| G20 Independent master data | Partially implemented in P1 | Prompt 06 implements Event, Vendor, Inventory, Finance, and Document category tables. Prompt 08 implements Clients/contacts. Vendors, departments/Staff profiles, and other domain masters remain planned. |
 | G30 Event configuration and core | P1 | module definitions seed, Event templates, template module suggestions, events, Event module settings, Event status histories, notes, timeline, media |
-| G40 Protected documents | P1 | document categories, documents, document links, versions after core owners exist |
+| G40 Protected documents | Partially implemented in P1 | Private documents, immutable versions, allowlisted links, expiry metadata, archive status, and protected downloads are implemented for Company/Branch/User/Client. Add other owner mappings only as later domain models are implemented. |
 | G50 Optional Booking | P2 | bookings and histories, changes, waitlist; then add nullable events.booking_id and its foreign key/index |
 | G60 Common Event operations | P2 | venues/spaces/allocations, vendor assignments/contracts/invoices, staff shifts/assignments/attendance/leave/salary, Event tasks and histories |
 | G70 Finance | P2 | finance categories, Event budgets/lines, income/expense entries, invoice sequences/invoices/items/history, payments/schedules/allocations/adjustments/refunds |

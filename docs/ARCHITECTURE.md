@@ -4,7 +4,7 @@
 
 This document fixes the application boundaries for feature development. It defines how the Laravel 12 application is organized, how the Event-centered optional-module model works, and which infrastructure choices are allowed on the cPanel target.
 
-Prompt 03 established the architecture baseline. Prompts 04 and 05 implement identity/RBAC and the reusable administration UI foundation. No Event Management business module described below is implemented merely because its boundary, navigation concept, or future class location appears here.
+Prompt 03 established the architecture baseline. Prompts 04 through 06 implement identity/RBAC, the reusable administration UI, and organization/settings/master-data foundations. No Event operational module described below is implemented merely because its boundary, navigation concept, or future class location appears here.
 
 ## System shape
 
@@ -199,6 +199,47 @@ Prompt 05 provides one responsive Blade/Bootstrap administration shell for prote
 
 Presentation components escape ordinary output and improve accessibility, but do not authorize. Routes, controllers, Policies/Gates, Form Requests, and query scopes remain the security boundary. The component contract and examples are documented in docs/UI_COMPONENTS.md.
 
+### Implemented organization settings and master data baseline
+
+Prompt 06 implements the configuration foundation used by later modules:
+
+- `companies` stores the one-company profile and public branding-logo metadata;
+- `system_settings` stores allowlisted typed values accessed only through `SettingsService`, with cache invalidation on write;
+- secret provider placeholders are encrypted through Laravel Crypt and are never returned to the browser or written to audit payloads;
+- `branches` and `branch_user` prepare optional branch assignments while `features.branches_enabled` remains false by default;
+- `BranchScope` is an explicit query strategy rather than a global Eloquent scope, so administrators and null-branch records cannot be silently hidden;
+- Event, Vendor, Inventory, Finance, and Document categories use separate models/tables with shared administration conventions; Finance retains its own direction constraint.
+
+The organization-settings middleware applies the configured timezone and locale to web requests. Currency, date format, tax, and invoice sequence values are typed inputs for later services; Prompt 06 does not issue invoices or implement any provider adapter. Communication providers remain disabled.
+
+### Implemented audit, status-history, and protected-document baseline
+
+Prompt 07 implements the M24/M29 cross-cutting foundation without introducing an Event or other business module:
+
+- `AuditService` recursively redacts credential, authorization, payment, bank, and sensitive dietary keys before append-only `audit_logs` storage; bounded request metadata retains IP and user agent without request bodies;
+- `login_histories` records authentication success/failure safely, and the permission-protected audit screens are read-only, paginated, and filterable;
+- `TracksStatusHistory`, `HasStatusHistory`, and `StatusTransitionService` provide explicit, transactional transitions with row locking, model-defined transition maps, actor/type/time/reason/metadata history, and an audit entry;
+- `documents`, append-only `document_versions`, and allowlisted `document_links` store protected metadata, current-version selection, contextual ownership, optional nullable branch, expiry, and archive state;
+- `DocumentService` validates both MIME and extension plus size/disk, computes a checksum, creates a UUID path on the private local disk, cleans up failed writes, and preserves every replacement version;
+- `DocumentPolicy` and `DocumentAccessService` protect lists, details, current/historical downloads, replacement, and archive. Storage paths are never exposed as URLs.
+
+Company, Branch, and User implement the reusable attachment relationship. Event, Client, Vendor, Booking, and other future owners are intentionally absent from the link allowlist until their modules exist. Document expiry alerts and malware-scanner integration remain later responsibilities. Detailed usage is in `docs/AUDIT_AND_PROTECTED_DOCUMENTS.md`.
+
+### Implemented Client master baseline
+
+Prompt 08 implements M04 as an independent global master without introducing Events or any later business module:
+
+- `Client` represents either an individual or organization, permits a nullable one-to-one portal `user_id`, and stores nullable `branch_id` for explicit `BranchScope` use;
+- `ClientContact` retains additional people and shared contact channels. Normalized names, emails, and phone digits support search and advisory duplicate detection without false uniqueness rules;
+- thin controllers and Form Requests delegate create/update/archive/reactivate/link/merge/contact rules to explicit transactional services;
+- policy checks and scoped queries protect every route; Administrator / Business Manager can complete all Client actions, while Event Manager receives only normal view/create/update/contact access;
+- no destructive Client delete route exists. Status transitions append actor/time/reason history, and merge preserves the source row while moving contacts and adding document context to the target;
+- `DocumentLink` now allowlists Client ownership, and portal users may access explicitly Client-linked documents only when the document permission boundary also allows the action;
+- the detail screen exposes explicit placeholders for Events, optional Bookings, Invoices, Payments, Communications, and actual protected Documents so later modules can populate without changing Client ownership;
+- the reusable `<x-clients.selector>` and JSON lookup/quick-create routes let the future Event form select or create a Client through the same request validation and business service.
+
+Client behavior and integration contracts are documented in `docs/CLIENT_MANAGEMENT.md`. Event creation, the Draft-to-active Client requirement, and all financial/communication source tables remain later prompts.
+
 ## Financial boundaries and transactions
 
 Financial amounts use decimal arithmetic and stored snapshots. Controllers and Blade templates never calculate authoritative totals.
@@ -246,7 +287,7 @@ Public storage is limited to intentionally public media. Signed URLs, if used, a
 
 Each implemented module requires feature tests for server-side authorization, Form Request validation, normal and failure paths, filters/pagination where lists exist, archive/history behavior, and enabled/disabled Event states. Unit tests cover pure rules and calculations. Database tests cover constraints, indexes, transactions, and rollback behavior.
 
-Prompt 03 added no business behavior. Prompt 04 added identity/security, and Prompt 05 adds only the shared presentation foundation. Event Management business routes and tables remain deferred. Architecture contract tests continue to validate the baseline and stable module keys.
+Prompt 03 added no business behavior. Prompt 04 added identity/security, Prompt 05 added the shared presentation foundation, Prompt 06 added cross-cutting organization configuration plus simple category master data, Prompt 07 added reusable audit/status/document services, and Prompt 08 adds the independent Client master. Event operational routes and tables remain deferred. Architecture contract tests continue to validate the baseline and stable module keys.
 
 ## Architecture decision records
 

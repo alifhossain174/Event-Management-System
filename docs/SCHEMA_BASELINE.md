@@ -23,4 +23,11 @@ File-based session and cache drivers are configured for the shared-hosting basel
 
 ## Deferred by design
 
-Clients, Events, Bookings, branches, module enablement, audit entries, status histories, payments, and every other SRS entity remain unimplemented. Their relationships, indexes, retention behavior, and authorization rules must follow the traceability matrix and recorded decisions in their assigned phases.
+Prompt 06 extends the implemented baseline with:
+
+- `companies` for the single organization profile and branding metadata;
+- `branches` plus `branch_user` for optional future scoping, with branch mode disabled by default;
+- `system_settings` for allowlisted typed values and encrypted secret placeholders;
+- separate `event_categories`, `vendor_categories`, `inventory_categories`, `finance_categories`, and `document_categories` tables with soft archive behavior.
+
+Clients, Events, Bookings, module enablement, payments, provider credentials, backup records, and later operational entities remain unimplemented. Their relationships, indexes, retention behavior, and authorization rules must follow the traceability matrix and recorded decisions in their assigned phases.

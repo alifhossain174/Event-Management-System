@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\ApplyOrganizationSettings;
 use App\Http\Middleware\EnsurePermission;
 use App\Http\Middleware\EnsureUserIsActive;
 use Illuminate\Foundation\Application;
@@ -13,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: null,
     )
     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->web(append: [ApplyOrganizationSettings::class]);
         $middleware->alias([
             'active' => EnsureUserIsActive::class,
             'permission' => EnsurePermission::class,

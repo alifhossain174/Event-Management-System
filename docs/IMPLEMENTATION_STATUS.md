@@ -2,7 +2,7 @@
 
 ## Current state
 
-Prompt 05 administration shell and reusable UI components are implemented and ready for review. The repository now has a responsive permission-aware shell, accessible shared Blade components, local-only style guide, and production error experiences. Event Management business modules remain unimplemented.
+Prompt 08 Client Management is implemented. The repository now has individual/organization Client masters independent of User accounts, contacts, normalized search and advisory duplicate warnings, filters/pagination, branch-aware policies, archive/reactivate/merge history, protected Client document context, privileged portal linkage, and reusable Event-form lookup/quick-create integration. Event records and later operational modules remain unimplemented.
 
 Status values for future updates are `Not Started`, `In Progress`, `Blocked`, `Ready for Review`, and `Complete`.
 
@@ -51,22 +51,55 @@ Status values for future updates are `Not Started`, `In Progress`, `Blocked`, `R
 | A05-05 | Local/testing-only protected UI style guide. | Complete — /style-guide is registered only in local/testing and remains behind authentication/active-account middleware. |
 | A05-06 | View/component regression coverage and full verification. | Complete — shell, permissions, escaping, style guide, and error views are covered. |
 
+## Prompt 06 Organization settings branches and configurable master data
+
+| Step | Deliverable | Status |
+| --- | --- | --- |
+| A06-01 | Single-company profile, address/contact details, public branding-logo metadata, and audited updates. | Complete — company profile supports validated branding upload metadata and preserves the single-company default. |
+| A06-02 | Typed cached settings for timezone, currency, locale, date format, tax, invoice numbering, and reversible feature flags. | Complete — `SettingsService` provides string, boolean, integer, and decimal access through the configured Laravel cache store. |
+| A06-03 | Encrypted and masked provider placeholders with providers disabled until later configuration work. | Complete — Laravel Crypt protects saved values; forms never repopulate them and audit payloads contain only configured state. |
+| A06-04 | Optional Branch entity, assignments, policies, administration, and an explicit scope strategy with branch mode disabled by default. | Complete — no global scope is installed; null-branch records remain accessible and administrators remain unrestricted. |
+| A06-05 | Configurable Event, Vendor, Inventory, Finance, and Document category infrastructure with domain-specific constraints. | Complete — separate tables/models share CRUD, filters, pagination, archive, policy, service, and audit patterns. |
+| A06-06 | Prompt 06 authorization, typed-value, encryption, masking, audit, filtering, pagination, archive, and branch-scope tests. | Complete — focused tests, clean MySQL migrate/rollback/reapply, and the full 36-test/238-assertion suite pass. |
+
+## Prompt 07 Audit status history and protected document services
+
+| Step | Deliverable | Status |
+| --- | --- | --- |
+| A07-01 | Central sanitized append-only AuditLog and LoginHistory conventions with actor/action/entity/time/IP/user-agent metadata. | Complete — recursive key redaction, bounded request metadata, model-level update/delete guards, and existing safe login capture are in place. |
+| A07-02 | Permission-protected, paginated, filterable audit and login-history administration screens. | Complete — read-only list/detail routes use policies and `audit.view`; no mutation endpoint exists. |
+| A07-03 | Reusable explicit status transition contract, history relationship, and transactional service. | Complete — transition maps live on participating models; the service locks, validates, updates, appends actor/time/reason metadata, and audits atomically. |
+| A07-04 | Protected Document, DocumentLink, and immutable DocumentVersion service with category, expiry, randomized paths, checksum, and version notes. | Complete — private local storage validates disk/MIME/extension/size and preserves every replacement version. |
+| A07-05 | Context-aware document policies, private current/historical downloads, ownership checks, archive history, and direct-public-link denial. | Complete — administrator access is complete; non-admin access is limited to explicit User/Branch/upload contexts plus granular permissions. |
+| A07-06 | Prompt 07 audit/redaction/authorization/upload/download/version/archive tests and full verification. | Complete — focused tests pass (8 tests/44 assertions), the complete suite passes (44 tests/287 assertions), Composer validation, Vite production build, Pint, Blade compilation, local migration status, and disposable clean migrate/rollback/reapply all pass. |
+
+## Prompt 08 Client management
+
+| Step | Deliverable | Status |
+| --- | --- | --- |
+| A08-01 | Individual/organization Client master independent of User, normalized searchable fields, nullable branch/user links, and supporting contacts. | Complete — schema, models, factories, Form Requests, services, and constraints are implemented. |
+| A08-02 | Manager list/create/view/edit with filters, pagination, details, contact administration, and progressively populated related-module summaries. | Complete — later Events/Bookings/finance/communications remain explicit placeholders; protected Documents populate now. |
+| A08-03 | Advisory duplicate detection that permits shared household/business contacts, plus privileged audited merge. | Complete — warnings never reject valid shared channels; merge retains the source and status/audit history. |
+| A08-04 | Non-destructive archive/reactivate, portal user linkage, branch-aware authorization, and sensitive-action audit hooks. | Complete — no destructive Client route exists and downstream relationships can use restrictive foreign keys. |
+| A08-05 | Reusable future Event-form Client selector, lookup endpoint, and quick-create path using shared validation/business rules. | Complete — Blade component and bounded JSON endpoints are permission-protected. |
+| A08-06 | Prompt 08 validation, authorization, branch, duplicate, contact, history, lookup, linkage, merge, migration, build, and regression verification. | Complete — focused Client suite passes (10 tests/74 assertions), full suite passes (54 tests/367 assertions), Composer validation, Vite production build, Pint, Blade compilation, local migration status, and isolated clean migrate/rollback/reapply all pass. |
+
 ## P1 Foundation and core Client to Event flow
 
 | Step | Deliverable | Status |
 | --- | --- | --- |
 | P1-01 | Administrator/Business Manager authentication and account lifecycle. | Complete — Prompt 04. |
 | P1-02 | RBAC permissions, policies/gates, and server-side authorization matrix. | Complete — Prompt 04 native RBAC baseline; module-specific permissions extend with each module. |
-| P1-03 | Company settings and branch-capable schema with branches disabled by default. | Not Started |
-| P1-04 | Client master records independent of User accounts. | Not Started |
+| P1-03 | Company settings and branch-capable schema with branches disabled by default. | Complete — Prompt 06. |
+| P1-04 | Client master records independent of User accounts. | Complete — Prompt 08. Event linkage and the Draft transition rule remain P1-08/P1-09. |
 | P1-05 | Vendor and Staff master records independent of User accounts. | Not Started |
-| P1-06 | Configurable Event Categories and Event Templates. | Not Started |
+| P1-06 | Configurable Event Categories and Event Templates. | In Progress — Prompt 06 implements Event Category master data; Event Templates remain deferred. |
 | P1-07 | Per-Event enabled-module configuration and data-preserving disable/re-enable behavior. | Not Started |
 | P1-08 | Direct Client to Event creation and Event status lifecycle. | Not Started |
 | P1-09 | Client-required transition rule for leaving Draft. | Not Started |
 | P1-10 | Event duplication, notes, timeline, media metadata, and completion/correction rules. | Not Started |
-| P1-11 | Protected common Document service using local Laravel storage. | Not Started |
-| P1-12 | Audit log, login history, and sensitive-action coverage. | In Progress — Prompt 04 covers identity/security actions; later module prompts add their sensitive actions. |
+| P1-11 | Protected common Document service using local Laravel storage. | Complete — Prompt 07 implements the reusable private storage, links, immutable versions, policies, filters, and downloads; later owners add only their contextual mapping. |
+| P1-12 | Audit log, login history, and sensitive-action coverage. | In Progress — Prompt 07 completes the reusable append-only/redaction/admin baseline and Prompts 04/06/07 cover existing sensitive actions; later modules remain responsible for their own action calls. |
 | P1-13 | Basic role-aware Dashboard, global search, reusable lists, filters, pagination, sorting, and archive patterns. | In Progress — Prompt 05 completes the reusable administration shell/list/filter/pagination patterns; Dashboard, global search, and generic sorting remain. |
 | P1-14 | P1 automated tests and core manager-flow acceptance test with Booking and portal accounts absent. | Not Started |
 
@@ -136,7 +169,7 @@ Status values for future updates are `Not Started`, `In Progress`, `Blocked`, `R
 | --- | --- |
 | P0 Environment and project bootstrap | In Progress — implementation complete; dedicated local DB user remains. |
 | Prompt 03 Architecture baseline | Complete |
-| P1 Foundation and core Client to Event flow | In Progress — authentication and native RBAC complete. |
+| P1 Foundation and core Client to Event flow | In Progress — authentication/RBAC, administration UI, settings, optional branches, category master data, audit/status history, protected documents, and Client Management are complete; Event work remains. |
 | P2 Common operations and finance | Not Started |
 | P3 Optional event services | Not Started |
 | P4 Reporting and business completion | Not Started |

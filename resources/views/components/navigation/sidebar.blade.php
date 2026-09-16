@@ -19,7 +19,7 @@
                     @php($isActive = request()->routeIs(...$item['patterns']))
                     <li class="nav-item">
                         <a class="nav-link d-flex align-items-center gap-3 {{ $isActive ? 'active' : '' }}"
-                           href="{{ route($item['route']) }}"
+                           href="{{ route($item['route'], $item['parameters'] ?? []) }}"
                            @if ($isActive) aria-current="page" @endif>
                             <x-ui.icon :name="$item['icon']" :size="19"/>
                             <span>{{ $item['label'] }}</span>

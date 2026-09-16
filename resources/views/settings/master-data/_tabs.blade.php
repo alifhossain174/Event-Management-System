@@ -1,0 +1,1 @@
+<x-ui.tabs :items="collect($types)->map(fn ($item, $key) => ['label' => $item['label'], 'url' => route('settings.master-data.index', $key), 'active' => $key === $type])->values()->all()" class="mb-4 flex-nowrap overflow-x-auto"/>
