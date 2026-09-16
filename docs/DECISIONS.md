@@ -1,0 +1,71 @@
+# Project Decisions and Assumptions
+
+## Purpose
+
+This record separates confirmed constraints from provisional planning defaults. Confirmed constraints are implementation boundaries. Assumptions are conservative, reversible defaults used to plan schema, screens, and tests until the business chooses differently.
+
+## Confirmed constraints
+
+| ID | Confirmed constraint | Implementation consequence |
+| --- | --- | --- |
+| D-001 | Use Laravel 12 for this environment. PHP 8.2.12 is installed; Laravel 12 supports PHP 8.2, while Laravel 13 requires PHP 8.3. | Scaffold with a `^12.0` framework constraint and do not adopt Laravel 13 until the local and production PHP versions are upgraded deliberately. |
+| D-002 | Use a Laravel MVC modular monolith with Blade, Bootstrap 5, and limited vanilla JavaScript. | Do not introduce React, Vue, Angular, Inertia, or a separate API frontend without a new decision. |
+| D-003 | Use MySQL-compatible storage with InnoDB, `utf8mb4`, foreign keys, transactions, and indexed relationship/filter fields. | The local XAMPP service is MariaDB 10.4.32 and is compatible with Laravel 12's supported MariaDB baseline. Production database compatibility must be rechecked before deployment. |
+| D-004 | Target standard cPanel shared hosting. | Prebuild frontend assets; production must not require a Node.js runtime, Redis, Horizon, Supervisor, a WebSocket server, or a persistent queue worker. |
+| D-005 | The primary workflow is manager-driven. One Administrator/Business Manager may complete the entire Event lifecycle. | No core step may require assignment or approval by a second user. RBAC still supports later separation of duties. |
+| D-006 | Booking is optional and must never be a prerequisite for Event creation or completion. | Booking references are nullable and both direct-Event and Booking-first flows require tests. |
+| D-007 | Client, Vendor, and Staff are business records independent of login identities. | Their `user_id` links are nullable. Creating a domain record must not create a User automatically. |
+| D-008 | Event Templates suggest modules but never force them. Module enablement is stored per Event. | Template application initializes editable selections. Disabling a populated module preserves its records and requires confirmation. |
+| D-009 | Payments are entered manually in the initial release; online gateways are future scope. | Keep a provider-independent payment ledger and no gateway settings, webhook handling, card processing, or automatic bKash/bank collection in the first release. |
+| D-010 | Initial outbound integrations run synchronously when enabled. | Provider errors require user feedback and logs; architecture may expose service boundaries without requiring queue infrastructure. |
+| D-011 | Notifications are stored, static in-application items. | Core acceptance uses page request/refresh and optional scheduled checks, with no socket-based real-time dependency. |
+| D-012 | Files use Laravel filesystem storage on the hosting account, with private access mediated by the application. | Public storage is limited to explicitly public media; documents and contracts use authorization-controlled downloads. |
+| D-013 | Bootstrap runtime state uses file sessions, file cache, synchronous queues, local storage, and log mail. | The application runs on standard cPanel hosting without Redis, workers, or external providers; production credentials can be enabled later through configuration. |
+| D-014 | Bootstrap 5.3.8 and its maintained Popper 2.11.8 peer are the only added frontend runtime packages. | They are compatible with the installed Vite pipeline and require no production Node.js process because assets are prebuilt. Laravel features and vanilla JavaScript remain preferred over speculative packages. |
+| D-015 | The installed framework is Laravel 12.69.2 under the Composer constraint `^12.0`. | Composer resolves on PHP 8.2 and Laravel 13 remains excluded because it requires PHP 8.3. |
+| D-016 | Prompt 02 exposes only the public landing page and Laravel health route. | Authentication, protected actions, list screens, workflow statuses, audit records, and domain modules remain intentionally deferred, so their Form Requests, policies, services, pagination, audit, and status-history infrastructure are not fabricated in this phase. |
+| D-017 | Organize the modular monolith with normal Laravel folders and domain-oriented subfolders; do not add a third-party modular framework. | Module ownership is enforced by namespaces, service boundaries, policies, transactions, and tests while the project remains familiar to Laravel developers and simple to deploy. |
+| D-018 | Use the stable module keys defined in `docs/ARCHITECTURE.md`; only the 18 event-scoped keys are stored as per-Event toggles. | Global/core modules cannot be accidentally disabled per Event. Template suggestions initialize editable Event state, dependency hints remain warnings, and disabling a populated module preserves its data. |
+| D-019 | Use the database conventions in `docs/DATABASE_ROADMAP.md`: Event-centered ownership, nullable optional links, `DECIMAL(19,4)` money, UTC instants, actor/timestamp status history, and nullable `branch_id` until branch mode is enabled. | Later migrations must implement and test these invariants; Prompt 03 does not create business tables. |
+| D-020 | Use native Laravel gates, policies, middleware, and explicit role/permission tables instead of adding an RBAC package. | The required authorization model is small enough for framework features; this avoids package/version risk and keeps the schema transparent. A package can be reconsidered if future requirements exceed the documented model. |
+| D-021 | Public registration is disabled. Administrators create accounts; a first Administrator / Business Manager is created from local-only environment values or the interactive `app:create-administrator` command. | No production password is committed. Manager-first operation is the default while later Client, Vendor, and Staff login accounts remain optional. |
+| D-022 | Users are deactivated or soft-archived rather than destructively deleted, and the final active administrator cannot be deactivated, archived, or stripped of that role. | Historical foreign keys remain meaningful, account status changes store actor/time/reason, and the installation cannot accidentally lose all administrative access. |
+| D-023 | Inactive and archived users cannot log in or receive password reset links; public authentication responses do not reveal whether an account exists or is inactive. | Login attempts are recorded with an internal reason, active sessions are terminated by middleware, and externally visible errors remain generic. |
+
+## Assumptions and reversible defaults
+
+Every item in this section is reversible. Reversal may require migrations, UI changes, new integrations, additional tests, or revised estimates, but the design should avoid destructive rewrites.
+
+| ID | Reversible default | Material scope effect | Reversal path or trigger |
+| --- | --- | --- | --- |
+| A-001 | Single company. | Material if the product must serve multiple independent companies or tenants. | Add tenant ownership, tenant-scoped uniqueness, isolation policies, onboarding, and tenant administration before production data is loaded. |
+| A-002 | Branch columns and relationships exist where relevant, but branch features and branch-scoped permissions are disabled by default. | Material if several branches need operational isolation at launch. | Enable a feature/configuration flag, require branch assignment, expose branch administration, and run the prepared branch-isolation tests. |
+| A-003 | Booking approval uses one manager action. | Material if multi-level or department approvals are required. | Introduce configurable approval stages, approver rules, escalation, and stage history without changing the optional Booking-to-Event relationship. |
+| A-004 | Staff salary is simple salary/payment tracking, not statutory payroll. | Material if tax, deductions, benefits, payslips, or jurisdictional filings are required. | Replace or integrate the ledger with a separately specified payroll module/provider and add compliance tests. |
+| A-005 | Tickets are quantity-based general admission; assigned seats are out of scope. | Material for reserved seating, numbered sections, or seat maps. | Add Venue seating inventory, seat holds, allocation timeouts, and seat-specific ticket validation. |
+| A-006 | Marketing supports planning, audience, consent, coupons/referrals, content/link tracking, and metrics without direct publishing to social networks. | Material if staff expect the system to publish posts. | Add separately authorized provider adapters, account/token management, platform review, scheduling semantics, and provider-specific tests. |
+| A-007 | Browser push is not implemented. Static in-app notifications remain in scope. | Material only if alerts must appear while the application is closed. | Add opt-in, service worker, subscription storage, provider selection, browser support policy, and delivery/privacy tests. |
+| A-008 | Email, SMS, WhatsApp, maps, and other communication providers are disabled until valid credentials and sender configuration exist. | Usually operational rather than business-scope material, but launch communications may depend on it. | Enable channels individually after credentials, consent/template rules, failure handling, and a production send test are approved. |
+| A-009 | Invoice prefix, sequence, tax rate/rules, and rounding are configurable; no jurisdiction-specific legal format is assumed. | Material if invoices must meet a statutory format or fiscal-device rule. | Configure agreed values or add a jurisdiction-specific invoice profile and legal acceptance tests. |
+| A-010 | Files use local protected Laravel storage on the hosting account. | Material if expected volume, disaster recovery, or distribution requires object storage/CDN. | Switch the filesystem disk through the storage abstraction, migrate objects, and re-run authorization/backup tests. |
+| A-011 | A Client may be omitted only while an Event is Draft; a Client is required before any transition out of Draft. | Material for internal, demo, or non-commercial Events that must progress without a Client. | Add an explicitly authorized internal-event type or relax the transition rule with corresponding reporting and finance behavior. |
+| A-012 | Every Event module is optional except the core Client to Event flow and cross-cutting security/audit behavior. | Material if any operational module must be mandatory for a category or company policy. | Add configurable required-module rules at company/category level while retaining Event overrides only where allowed. |
+| A-013 | The application timezone defaults to UTC until the authoritative business timezone is confirmed. | Operationally material for schedules and reports, but it does not change feature scope. | Set `APP_TIMEZONE` before real business data is entered, document the chosen zone, and test date-boundary reports and schedules. |
+
+## Open details that remain unconfirmed
+
+These items are intentionally not converted into hidden business decisions:
+
+- Refund and cancellation formulas for Bookings and Tickets.
+- Launch languages, currencies, and the authoritative business timezone.
+- Expected users, Events per year, attendees/tickets per Event, and storage volume.
+- First-release Client, Vendor, or Staff portal screens, if any.
+- Whether Venues include owned locations, third-party locations, or both.
+- Initial Event Categories/Templates and their suggested module sets.
+- Data retention periods, backup retention, recovery point objective, and recovery time objective.
+- Reports requiring legal/statutory formatting rather than management-only output.
+- cPanel cron availability and production PHP/database versions.
+
+## Change control
+
+When an assumption changes, record the replacement decision here, update the affected traceability rows, assess existing data migration, and revise tests before implementation. A default becoming confirmed should move from the assumptions section to the confirmed constraints section with the confirming date and source.

@@ -1,0 +1,24 @@
+@import 'bootstrap/dist/css/bootstrap.min.css';
+
+:root {
+    color-scheme: light;
+}
+
+body {
+    min-height: 100vh;
+    background: #f5f7fb;
+}
+
+.hero-card {
+    max-width: 52rem;
+    border: 0;
+    box-shadow: 0 1rem 3rem rgb(15 23 42 / 10%);
+}
+
+.auth-card {
+    max-width: 30rem;
+}
+
+.table-actions {
+    min-width: 12rem;
+}
