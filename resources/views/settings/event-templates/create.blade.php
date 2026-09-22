@@ -1,0 +1,2 @@
+<x-layouts.app title="Create event template" :breadcrumbs="[['label'=>'Settings','url'=>route('settings.edit')],['label'=>'Event templates','url'=>route('settings.event-templates.index')],['label'=>'Create']]">
+<x-ui.page-header title="Create event template" subtitle="Create an editable suggestion set; nothing here permanently forces an Event module."/><form method="POST" action="{{ route('settings.event-templates.store') }}">@csrf @include('settings.event-templates._form')</form></x-layouts.app>

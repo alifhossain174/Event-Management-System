@@ -1,0 +1,21 @@
+<x-layouts.app title="Venue availability" wide :breadcrumbs="[['label'=>'Venues','url'=>route('venues.index')],['label'=>'Availability']]">
+    <x-ui.page-header title="Venue availability" subtitle="Calendar-ready allocation list derived from Event schedules; cancelled Events and allocations are excluded."><x-slot:actions><a class="btn btn-outline-secondary" href="{{ route('venues.index') }}">Back to venues</a></x-slot:actions></x-ui.page-header>
+    <x-ui.filter-bar :action="route('venues.availability')" :clear-url="route('venues.availability')">
+        <div class="col-md-2"><label class="form-label" for="view">View</label><select class="form-select" id="view" name="view"><option value="list" @selected($viewMode==='list')>List</option><option value="calendar" @selected($viewMode==='calendar')>Calendar</option></select></div>
+        <div class="col-md-2"><label class="form-label" for="month">Calendar month</label><input class="form-control" type="month" id="month" name="month" value="{{ $month->format('Y-m') }}"></div>
+        <div class="col-md-3"><label class="form-label" for="from">From</label><input class="form-control" type="date" id="from" name="from" value="{{ $filters['from']??'' }}"></div>
+        <div class="col-md-3"><label class="form-label" for="until">Until</label><input class="form-control" type="date" id="until" name="until" value="{{ $filters['until']??'' }}"></div>
+        <div class="col-md-4"><label class="form-label" for="venue">Venue</label><select class="form-select" id="venue" name="venue"><option value="">All venues</option>@foreach($venues as $venue)<option value="{{ $venue->id }}" @selected((string)($filters['venue']??'')===(string)$venue->id)>{{ $venue->name }}</option>@endforeach</select></div>
+    </x-ui.filter-bar>
+    @if($viewMode === 'calendar')
+        <section class="card mb-4"><div class="card-body p-3"><div class="d-flex justify-content-between align-items-center mb-3"><h2 class="h4 mb-0">{{ $month->format('F Y') }}</h2><span class="small text-secondary">Maximum 200 visible allocations</span></div>
+            <div class="table-responsive"><table class="table table-bordered align-top venue-calendar"><caption class="visually-hidden">Venue allocation calendar for {{ $month->format('F Y') }}</caption><thead><tr>@foreach(['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'] as $weekday)<th scope="col">{{ $weekday }}</th>@endforeach</tr></thead><tbody>
+            @foreach($calendarWeeks as $week)<tr>@foreach($week as $day)<td class="{{ $day['date']->month !== $month->month ? 'bg-body-tertiary text-secondary' : '' }}" style="min-width:9rem;height:8rem"><strong>{{ $day['date']->day }}</strong>@foreach($day['allocations'] as $allocation)<a class="d-block small mt-1 text-decoration-none" href="{{ route('events.venue.index',$allocation->event) }}"><span class="badge text-bg-primary text-wrap text-start">{{ $allocation->venue->name }} · {{ $allocation->event->reference_number }}</span></a>@endforeach</td>@endforeach</tr>@endforeach
+            </tbody></table></div>
+        </div></section>
+    @else
+    <x-ui.data-table :columns="[['label'=>'Date and time'],['label'=>'Venue / space'],['label'=>'Event'],['label'=>'Allocation']]" caption="Venue allocation list" :empty="$allocations->isEmpty()" empty-title="No allocations in this period">
+        @foreach($allocations as $allocation)<tr><td>{{ $allocation->event->starts_at->format('M j, Y H:i') }}<span class="d-block small text-secondary">to {{ $allocation->event->ends_at->format('M j, Y H:i') }} {{ $allocation->event->timezone }}</span></td><td><a href="{{ route('venues.show',$allocation->venue) }}">{{ $allocation->venue->name }}</a><span class="d-block small text-secondary">{{ $allocation->space?->name ?? 'Whole venue' }}</span></td><td><a href="{{ route('events.show',$allocation->event) }}">{{ $allocation->event->reference_number }}</a><span class="d-block small text-secondary">{{ $allocation->event->name }}</span></td><td><x-ui.status-badge :status="$allocation->status"/> {{ $allocation->is_exclusive ? 'Exclusive' : 'Shared' }}</td></tr>@endforeach
+    </x-ui.data-table><x-ui.pagination :paginator="$allocations"/>
+    @endif
+</x-layouts.app>

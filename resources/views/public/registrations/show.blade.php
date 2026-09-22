@@ -1,0 +1,6 @@
+<x-layouts.app :title="$registrationForm->name">
+    <div class="container-lg py-5"><div class="row justify-content-center"><div class="col-xl-8">
+        <header class="mb-4"><p class="text-primary fw-semibold mb-1">{{ $registrationForm->event->name }}</p><h1>{{ $registrationForm->name }}</h1><p class="text-secondary">Registration is free and independent of ticket sales unless the organizer states otherwise.</p></header>
+        <form class="card card-body p-4" method="POST" action="{{ route('public.registrations.store',$registrationForm->public_slug) }}">@csrf<input type="hidden" name="idempotency_key" value="{{ old('idempotency_key',$idempotencyKey) }}"><div class="visually-hidden" aria-hidden="true"><label for="website">Website</label><input id="website" name="website" tabindex="-1" autocomplete="off"></div>@include('events.registrations._submission-fields')@if($registrationForm->privacy_text)<div class="alert alert-light border mt-4"><strong>Privacy notice</strong><p class="mb-0 mt-1">{{ $registrationForm->privacy_text }}</p></div>@endif<div class="mt-4"><button class="btn btn-primary" type="submit">Submit registration</button></div></form>
+    </div></div></div>
+</x-layouts.app>

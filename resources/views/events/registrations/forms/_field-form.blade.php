@@ -1,0 +1,12 @@
+<div class="row g-3 mb-3">
+    <div class="col-md-4"><label class="form-label" for="field_label">Label</label><input class="form-control" id="field_label" name="label" required maxlength="191"></div>
+    <div class="col-md-4"><label class="form-label" for="field_key">Stable key</label><input class="form-control" id="field_key" name="key" required maxlength="64" pattern="[A-Za-z0-9_-]+"><div class="form-text">Letters, numbers, dashes, and underscores only.</div></div>
+    <div class="col-md-4"><label class="form-label" for="field_type">Type</label><select class="form-select" id="field_type" name="type">@foreach(App\Models\RegistrationField::TYPES as $type)<option value="{{ $type }}">{{ str($type)->headline() }}</option>@endforeach</select></div>
+    <div class="col-md-6"><label class="form-label" for="field_help">Help text</label><input class="form-control" id="field_help" name="help_text" maxlength="1000"></div>
+    <div class="col-md-6"><label class="form-label" for="field_options">Options</label><textarea class="form-control" id="field_options" name="options" rows="3" placeholder="One option per line"></textarea></div>
+    <div class="col-md-3"><label class="form-label" for="min_length">Minimum length</label><input class="form-control" id="min_length" name="min_length" type="number" min="0"></div>
+    <div class="col-md-3"><label class="form-label" for="max_length">Maximum length</label><input class="form-control" id="max_length" name="max_length" type="number" min="1"></div>
+    <div class="col-md-3"><label class="form-label" for="min_value">Minimum value</label><input class="form-control" id="min_value" name="min_value" type="number" step="any"></div>
+    <div class="col-md-3"><label class="form-label" for="max_value">Maximum value</label><input class="form-control" id="max_value" name="max_value" type="number" step="any"></div>
+    <div class="col-12 d-flex gap-4"><div class="form-check"><input type="hidden" name="is_required" value="0"><input class="form-check-input" type="checkbox" id="field_required" name="is_required" value="1"><label class="form-check-label" for="field_required">Required</label></div><div class="form-check"><input type="hidden" name="is_active" value="0"><input class="form-check-input" type="checkbox" id="field_active" name="is_active" value="1" checked><label class="form-check-label" for="field_active">Active</label></div></div>
+</div>

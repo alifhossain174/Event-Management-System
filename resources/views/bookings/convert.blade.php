@@ -1,0 +1,25 @@
+@php
+    $eventTimezone = old('timezone', $booking->timezone ?: $organizationTimezone);
+    $templateDefaults = $templates->mapWithKeys(fn ($template) => [(string) $template->id => $template->modules->where('recommendation', 'default')->pluck('module_key')->values()]);
+    $selectedModules = collect(old('enabled_modules', $initialEnabledModules));
+@endphp
+<x-layouts.app title="Convert booking" wide :breadcrumbs="[['label' => 'Bookings', 'url' => route('bookings.index')], ['label' => $booking->reference_number, 'url' => route('bookings.show', $booking)], ['label' => 'Convert']]">
+    <x-ui.page-header title="Convert booking to event" :subtitle="'Review copied details and optional modules for '.$booking->reference_number.'.'"/>
+    @foreach ($moduleWarnings as $warning)<div class="alert alert-warning">{{ $warning }}</div>@endforeach
+    <x-ui.validation-summary class="mb-4"/>
+    <form method="POST" action="{{ route('bookings.convert.store', $booking) }}">@csrf
+        <div class="row g-4"><div class="col-xl-8">
+            <section class="card mb-4"><div class="card-body p-4"><h2 class="h4">Event details</h2><div class="row g-3">
+                <div class="col-12"><x-ui.form.input name="name" label="Event name" :value="$booking->category->name.' for '.$booking->client->display_name" required maxlength="180"/></div>
+                <div class="col-md-6"><x-ui.form.select name="event_category_id" label="Event category" :options="$categories->pluck('name', 'id')" :value="$booking->requested_event_category_id" required/></div>
+                <div class="col-md-6"><x-ui.form.select name="event_template_id" label="Template" :options="$templates->pluck('name', 'id')" :value="$selectedTemplate?->id" placeholder="No template / Custom" data-event-template/></div>
+                <div class="col-md-6"><x-ui.form.select name="manager_user_id" label="Organizer / manager" :options="$managers->pluck('name', 'id')" placeholder="Unassigned"/></div>
+                <div class="col-md-6"><x-ui.form.select name="branch_id" label="Branch" :options="$branches->pluck('name', 'id')" :value="$booking->branch_id" placeholder="Unscoped / default branch"/></div>
+            </div></div></section>
+            <section class="card mb-4"><div class="card-body p-4"><h2 class="h4">Schedule</h2><div class="row g-3"><div class="col-md-6"><x-ui.form.input name="starts_at_local" label="Starts" type="datetime-local" :value="$booking->requested_starts_at->setTimezone($eventTimezone)->format('Y-m-d\TH:i')" required/></div><div class="col-md-6"><x-ui.form.input name="ends_at_local" label="Ends" type="datetime-local" :value="$booking->requested_ends_at->setTimezone($eventTimezone)->format('Y-m-d\TH:i')" required/></div><div class="col-md-6"><x-ui.form.select name="timezone" label="Time zone" :options="$timezones" :value="$eventTimezone" required/></div></div></div></section>
+            <section class="card"><div class="card-body p-4"><h2 class="h4">Copied planning brief</h2><div class="row g-3"><div class="col-md-6"><x-ui.form.input name="expected_guest_count" label="Expected guests" type="number" :value="$booking->expected_guest_count" min="0"/></div><div class="col-md-6"><x-ui.form.input name="core_budget_estimate" label="Core budget estimate" type="number" :value="$booking->budget_estimate" min="0" step="0.0001"/></div><div class="col-12"><x-ui.form.textarea name="description" label="Description" :value="$booking->notes" rows="6"/></div></div></div></section>
+        </div><div class="col-xl-4"><section class="card"><div class="card-body p-4"><h2 class="h4">Optional modules</h2><p class="text-secondary">Template suggestions are editable; all modules may remain disabled.</p>@error('enabled_modules')<div class="alert alert-danger">{{ $message }}</div>@enderror<div class="vstack gap-2" data-event-modules>@foreach ($moduleDefinitions as $definition)<div class="form-check"><input class="form-check-input" type="checkbox" name="enabled_modules[]" value="{{ $definition->key }}" id="convert-module-{{ $definition->key }}" @checked($selectedModules->contains($definition->key))><label class="form-check-label" for="convert-module-{{ $definition->key }}"><strong>{{ $definition->display_label }}</strong>@if ($definition->description)<span class="d-block small text-secondary">{{ $definition->description }}</span>@endif</label></div>@endforeach</div></div></section></div></div>
+        <div class="d-flex gap-2 mt-4"><button class="btn btn-primary" type="submit">Create draft event</button><a class="btn btn-outline-secondary" href="{{ route('bookings.show', $booking) }}">Cancel</a></div>
+    </form>
+    <script>document.addEventListener('DOMContentLoaded', () => { const template = document.querySelector('[data-event-template]'); const root = document.querySelector('[data-event-modules]'); const defaults = @js($templateDefaults); template?.addEventListener('change', () => { const enabled = new Set(defaults[template.value] ?? []); root?.querySelectorAll('input[type="checkbox"]').forEach((checkbox) => checkbox.checked = enabled.has(checkbox.value)); }); });</script>
+</x-layouts.app>

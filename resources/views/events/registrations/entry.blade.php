@@ -1,0 +1,4 @@
+<x-layouts.app :title="'Offline registration · '.$event->name" :breadcrumbs="[['label'=>'Events','url'=>route('events.index')],['label'=>$event->name,'url'=>route('events.show',$event)],['label'=>'Registrations','url'=>route('events.registrations.index',$event)],['label'=>'Offline entry']]">
+    <x-ui.page-header title="Offline registration" :subtitle="$registrationForm->name.' · entered by an authorized manager'"/>
+    <form class="card card-body" method="POST" action="{{ route('events.registrations.store',[$event,$registrationForm]) }}">@csrf<input type="hidden" name="idempotency_key" value="{{ old('idempotency_key',(string) Str::uuid()) }}">@include('events.registrations._submission-fields')<div class="mt-4"><button class="btn btn-primary" type="submit">Record registration</button></div></form>
+</x-layouts.app>

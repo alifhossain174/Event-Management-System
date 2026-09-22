@@ -1,0 +1,1 @@
+<x-layouts.app title="Create staff profile" :breadcrumbs="[['label'=>'Staff','url'=>route('staff.index')],['label'=>'Create']]"><x-ui.page-header title="Create staff profile" subtitle="A workforce record does not create a login account."/><form method="POST" action="{{ route('staff.store') }}">@csrf @include('staff._form')</form></x-layouts.app>

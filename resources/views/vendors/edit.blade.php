@@ -1,0 +1,2 @@
+<x-layouts.app :title="'Edit '.$vendor->display_name" :breadcrumbs="[['label'=>'Vendors','url'=>route('vendors.index')],['label'=>$vendor->display_name,'url'=>route('vendors.show',$vendor)],['label'=>'Edit']]">
+<x-ui.page-header :title="'Edit '.$vendor->display_name"/><form method="POST" action="{{ route('vendors.update',$vendor) }}">@csrf @method('PUT') @include('vendors._form')</form></x-layouts.app>
